@@ -1,8 +1,8 @@
-import mongoose, { model, Schema } from "mongoose";
+import { model, Schema } from "mongoose";
 
 const UserSchema = new Schema({
   username: { type: String, unique: true },
-  password: String,
+  password: { type: String, required: true },
 });
 
-export const UserModel = mongoose.model("User", UserSchema);
+export const UserModel = model("User", UserSchema);

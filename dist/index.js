@@ -18,41 +18,103 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const db_1 = require("./db");
 require("dotenv/config");
 const config_1 = require("./config");
+const zod_1 = require("zod");
+const bcrypt_1 = __importDefault(require("bcrypt"));
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.post("/api/v1/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { username, password } = req.body;
-    yield db_1.UserModel.create({
-        username: username,
-        password: password,
+    const signupSchema = zod_1.z.object({
+        username: zod_1.z
+            .string()
+            .min(4, "Username is too short.")
+            .max(25, "Username is too long")
+            .trim(),
+        password: zod_1.z.string().min(6).max(25),
     });
-    res.json({
-        message: "User signed up",
-    });
+    const parseDataWithSuccess = signupSchema.safeParse(req.body);
+    if (!parseDataWithSuccess.success) {
+        res.status(400).json({
+            message: "Incorrect format",
+            error: parseDataWithSuccess.error.errors,
+        });
+    }
+    const { username, password } = parseDataWithSuccess.data;
+    try {
+        const existingUser = yield db_1.UserModel.findOne({
+            username,
+        });
+        if (existingUser) {
+            res.status(411).json({
+                message: "Username already exists",
+            });
+        }
+        const hashedPassword = yield bcrypt_1.default.hash(password, 10);
+        yield db_1.UserModel.create({
+            username: username,
+            password: hashedPassword,
+        });
+        res.status(201).json({
+            message: "User successfully created",
+        });
+    }
+    catch (error) {
+        res.status(500).json({ message: "Interval server error" });
+        if (error.code === 11000) {
+            console.log("Duplicate entry is found");
+            const field = Object.keys(error.keyPattern)[0];
+            res.json({
+                success: false,
+                message: `${field.charAt(0).toUpperCase + field.slice(1)} already exists`,
+            });
+        }
+    }
 }));
 app.post("/api/v1/signin", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const username = req.body.username;
-    const password = req.body.password;
-    const existingUser = yield db_1.UserModel.findOne({
-        username,
+    const signinSchema = zod_1.z.object({
+        username: zod_1.z
+            .string()
+            .min(4, "Username is too short.")
+            .max(25, "Username is too long")
+            .trim(),
+        password: zod_1.z.string().min(6).max(25),
     });
-    if (existingUser) {
-        const token = jsonwebtoken_1.default.sign({
-            id: existingUser._id,
-        }, config_1.JWT_PASSWORD);
-        res.json({
-            token,
+    const parseDataWithSuccess = signinSchema.safeParse(req.body);
+    if (!parseDataWithSuccess.success) {
+        res.status(400).json({
+            message: "Invalid credentials format",
+            error: parseDataWithSuccess.error.errors,
         });
     }
-    else {
-        res.status(403).json({
-            message: "Incorrect credentials",
+    const { username, password } = parseDataWithSuccess.data;
+    try {
+        const existingUser = yield db_1.UserModel.findOne({
+            username,
         });
+        if (existingUser) {
+            const isPasswordValid = yield bcrypt_1.default.compare(password, existingUser.password);
+            if (!isPasswordValid) {
+                res.status(403).json({ message: "Incorrect credentials" });
+            }
+            const token = jsonwebtoken_1.default.sign({
+                id: existingUser._id,
+            }, config_1.JWT_PASSWORD);
+            res.json({
+                token,
+            });
+        }
+        else {
+            res.status(403).json({
+                message: "Incorrect credentials",
+            });
+        }
+    }
+    catch (error) {
+        res.status(500).json({ message: "Internal server error" });
     }
 }));
-app.get("/api/v1/signup", (req, res) => { });
-app.delete("/api/v1/delete", (req, res) => { });
-app.post("/api/v1/stash/:shareLink", (req, res) => { });
+// app.get("/api/v1/signup", (req, res) => {});
+// app.delete("/api/v1/delete", (req, res) => {});
+// app.post("/api/v1/stash/:shareLink", (req, res) => {});
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         if (!process.env.DATABASE_URL) {
