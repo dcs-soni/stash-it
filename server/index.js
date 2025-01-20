@@ -138,7 +138,13 @@ app.get("/api/v1/content", middleware_1.userMiddleware, (req, res) => __awaiter(
         content,
     });
 }));
-// app.delete("/api/v1/delete", (req, res) => {});
+app.delete("/api/v1/delete", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const contentId = req.body.contentId;
+    yield db_1.ContentModel.deleteMany({
+        contentId,
+        userId: req.userId,
+    });
+}));
 // app.post("/api/v1/stash/:shareLink", (req, res) => {});
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
