@@ -2,11 +2,12 @@ import { Request, Response } from "express";
 import express from "express";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
-import { UserModel } from "./db";
+import { ContentModel, UserModel } from "./db";
 import "dotenv/config";
 import { JWT_PASSWORD } from "./config";
 import { z } from "zod";
 import bcrypt from "bcrypt";
+import { userMiddleware } from "./middleware";
 
 const app = express();
 app.use(express.json());
@@ -127,9 +128,56 @@ app.post(
   }
 );
 
-// app.get("/api/v1/signup", (req, res) => {});
+app.post(
+  "/api/v1/content",
+  userMiddleware,
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { link, type } = req.body;
 
-// app.delete("/api/v1/delete", (req, res) => {});
+      if (!req.userId) {
+        res.status(403).json({
+          message: "User ID not found in request",
+        });
+      }
+
+      await ContentModel.create({
+        link,
+        type,
+        userId: req.userId,
+        tags: [],
+      });
+
+      res.json({
+        message: "Content addded",
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: "Error creating cotent",
+      });
+    }
+  }
+);
+
+app.get("/api/v1/content", userMiddleware, async (req, res) => {
+  const userId = req.userId;
+  const content = await ContentModel.find({
+    userId: userId,
+  }).populate("userId");
+
+  res.json({
+    content,
+  });
+});
+
+app.delete("/api/v1/delete", userMiddleware, async (req, res) => {
+  const contentId = req.body.contentId;
+
+  await ContentModel.deleteMany({
+    contentId,
+    userId: req.userId,
+  });
+});
 
 // app.post("/api/v1/stash/:shareLink", (req, res) => {});
 

@@ -20,6 +20,7 @@ require("dotenv/config");
 const config_1 = require("./config");
 const zod_1 = require("zod");
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const middleware_1 = require("./middleware");
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.post("/api/v1/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -59,14 +60,6 @@ app.post("/api/v1/signup", (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
     catch (error) {
         res.status(500).json({ message: "Interval server error" });
-        if (error.code === 11000) {
-            console.log("Duplicate entry is found");
-            const field = Object.keys(error.keyPattern)[0];
-            res.json({
-                success: false,
-                message: `${field.charAt(0).toUpperCase + field.slice(1)} already exists`,
-            });
-        }
     }
 }));
 app.post("/api/v1/signin", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -112,7 +105,39 @@ app.post("/api/v1/signin", (req, res) => __awaiter(void 0, void 0, void 0, funct
         res.status(500).json({ message: "Internal server error" });
     }
 }));
-// app.get("/api/v1/signup", (req, res) => {});
+app.post("/api/v1/content", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { link, type } = req.body;
+        if (!req.userId) {
+            res.status(403).json({
+                message: "User ID not found in request",
+            });
+        }
+        yield db_1.ContentModel.create({
+            link,
+            type,
+            userId: req.userId,
+            tags: [],
+        });
+        res.json({
+            message: "Content addded",
+        });
+    }
+    catch (error) {
+        res.status(500).json({
+            message: "Error creating cotent",
+        });
+    }
+}));
+app.get("/api/v1/content", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const userId = req.userId;
+    const content = yield db_1.ContentModel.find({
+        userId: userId,
+    }).populate("userId");
+    res.json({
+        content,
+    });
+}));
 // app.delete("/api/v1/delete", (req, res) => {});
 // app.post("/api/v1/stash/:shareLink", (req, res) => {});
 function main() {
