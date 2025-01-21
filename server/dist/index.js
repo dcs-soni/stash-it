@@ -21,6 +21,7 @@ const config_1 = require("./config");
 const zod_1 = require("zod");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const middleware_1 = require("./middleware");
+const utils_1 = require("./utils");
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.post("/api/v1/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -120,12 +121,12 @@ app.post("/api/v1/content", middleware_1.userMiddleware, (req, res) => __awaiter
             tags: [],
         });
         res.json({
-            message: "Content addded",
+            message: "Content added",
         });
     }
     catch (error) {
         res.status(500).json({
-            message: "Error creating cotent",
+            message: "Error creating content",
         });
     }
 }));
@@ -145,7 +146,73 @@ app.delete("/api/v1/delete", middleware_1.userMiddleware, (req, res) => __awaite
         userId: req.userId,
     });
 }));
-// app.post("/api/v1/stash/:shareLink", (req, res) => {});
+app.post("/api/v1/stash", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const share = req.body.share;
+        if (share) {
+            const existingLink = yield db_1.LinkModel.findOne({
+                userId: req.userId,
+            });
+            if (existingLink) {
+                res.json({
+                    hash: existingLink.hash,
+                });
+                return;
+            }
+            const hash = (0, utils_1.random)(10);
+            console.log((0, utils_1.random)(10));
+            console.log((0, utils_1.random)(5));
+            console.log(hash);
+            yield db_1.LinkModel.create({
+                userId: req.userId,
+                hash: hash,
+            });
+            res.json({
+                hash,
+            });
+        }
+        else {
+            yield db_1.LinkModel.deleteOne({
+                userId: req.userId,
+            });
+            res.json({
+                message: "Removed link",
+            });
+        }
+    }
+    catch (error) {
+        console.error("Error in /api/v1/stash:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}));
+app.get("/api/v1/stash/:shareLink", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const hash = req.params.shareLink;
+    const link = yield db_1.LinkModel.findOne({
+        hash,
+    });
+    if (!link) {
+        res.status(411).json({
+            message: "Sorry incorrect input",
+        });
+        return;
+    }
+    const content = yield db_1.ContentModel.find({
+        userId: link.userId,
+    });
+    const user = yield db_1.UserModel.findOne({
+        _id: link.userId,
+    });
+    if (!user) {
+        res.status(411).json({
+            message: "User not found ",
+        });
+        return;
+    }
+    res.json({
+        username: user.username,
+        content,
+    });
+}));
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         if (!process.env.DATABASE_URL) {

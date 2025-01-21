@@ -10,14 +10,6 @@ import bcrypt from "bcrypt";
 import { userMiddleware } from "./middleware";
 import { random } from "./utils";
 
-process.on("uncaughtException", (error) => {
-  console.error("Uncaught Exception:", error);
-});
-
-process.on("unhandledRejection", (error) => {
-  console.error("Unhandled Rejection:", error);
-});
-
 const app = express();
 app.use(express.json());
 
@@ -189,36 +181,45 @@ app.delete("/api/v1/delete", userMiddleware, async (req, res) => {
 });
 
 app.post("/api/v1/stash", userMiddleware, async (req, res) => {
-  const share = req.body.share;
-  if (share) {
-    const existingLink = await LinkModel.findOne({
-      userId: req.userId,
-    });
-
-    if (existingLink) {
-      res.json({
-        hash: existingLink.hash,
+  try {
+    const share = req.body.share;
+    if (share) {
+      const existingLink = await LinkModel.findOne({
+        userId: req.userId,
       });
 
-      return;
+      if (existingLink) {
+        res.json({
+          hash: existingLink.hash,
+        });
+
+        return;
+      }
+      const hash = random(10);
+
+      console.log(random(10));
+      console.log(random(5));
+      console.log(hash);
+      await LinkModel.create({
+        userId: req.userId,
+        hash: hash,
+      });
+
+      res.json({
+        hash,
+      });
+    } else {
+      await LinkModel.deleteOne({
+        userId: req.userId,
+      });
+
+      res.json({
+        message: "Removed link",
+      });
     }
-    const hash = random(10);
-    await LinkModel.create({
-      userId: req.userId,
-      hash: hash,
-    });
-
-    res.json({
-      hash,
-    });
-  } else {
-    await LinkModel.deleteOne({
-      userId: req.userId,
-    });
-
-    res.json({
-      message: "Removed link",
-    });
+  } catch (error) {
+    console.error("Error in /api/v1/stash:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
