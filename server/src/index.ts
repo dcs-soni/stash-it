@@ -2,12 +2,21 @@ import { Request, Response } from "express";
 import express from "express";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
-import { ContentModel, UserModel } from "./db";
+import { ContentModel, LinkModel, UserModel } from "./db";
 import "dotenv/config";
 import { JWT_PASSWORD } from "./config";
 import { z } from "zod";
 import bcrypt from "bcrypt";
 import { userMiddleware } from "./middleware";
+import { random } from "./utils";
+
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught Exception:", error);
+});
+
+process.on("unhandledRejection", (error) => {
+  console.error("Unhandled Rejection:", error);
+});
 
 const app = express();
 app.use(express.json());
@@ -149,11 +158,11 @@ app.post(
       });
 
       res.json({
-        message: "Content addded",
+        message: "Content added",
       });
     } catch (error) {
       res.status(500).json({
-        message: "Error creating cotent",
+        message: "Error creating content",
       });
     }
   }
@@ -179,7 +188,75 @@ app.delete("/api/v1/delete", userMiddleware, async (req, res) => {
   });
 });
 
-// app.post("/api/v1/stash/:shareLink", (req, res) => {});
+app.post("/api/v1/stash", userMiddleware, async (req, res) => {
+  const share = req.body.share;
+  if (share) {
+    const existingLink = await LinkModel.findOne({
+      userId: req.userId,
+    });
+
+    if (existingLink) {
+      res.json({
+        hash: existingLink.hash,
+      });
+
+      return;
+    }
+    const hash = random(10);
+    await LinkModel.create({
+      userId: req.userId,
+      hash: hash,
+    });
+
+    res.json({
+      hash,
+    });
+  } else {
+    await LinkModel.deleteOne({
+      userId: req.userId,
+    });
+
+    res.json({
+      message: "Removed link",
+    });
+  }
+});
+
+app.get("/api/v1/stash/:shareLink", async (req, res) => {
+  const hash = req.params.shareLink;
+
+  const link = await LinkModel.findOne({
+    hash,
+  });
+
+  if (!link) {
+    res.status(411).json({
+      message: "Sorry incorrect input",
+    });
+    return;
+  }
+
+  const content = await ContentModel.find({
+    userId: link.userId,
+  });
+
+  const user = await UserModel.findOne({
+    _id: link.userId,
+  });
+
+  if (!user) {
+    res.status(411).json({
+      message: "User not found ",
+    });
+
+    return;
+  }
+
+  res.json({
+    username: user.username,
+    content,
+  });
+});
 
 async function main() {
   if (!process.env.DATABASE_URL) {
