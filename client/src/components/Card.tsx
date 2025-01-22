@@ -12,8 +12,8 @@ interface CardProps {
 
 export function Card({ title, link, type }: CardProps) {
   return (
-    <div className="p-4 bg-white-200 border border-gray-200 rounded-md max-w-72 max-h-96">
-      <div className="flex justify-between items-center border-b-2 pb-2 border-gray-100">
+    <div className="p-4 bg-white-200 border border-gray-200 rounded-md max-w-72 max-h-96 group">
+      <div className="flex justify-between items-center border-b-2 pb-2 border-gray-100 ">
         <div className="flex items-center text-sm">
           <div className="pr-2">
             {type === "youtube" && <YoutubeIcon />}
@@ -23,7 +23,7 @@ export function Card({ title, link, type }: CardProps) {
         </div>
 
         <div className="flex text-gray-500 items-center">
-          <div className="pr-4 cursor-pointer">
+          <div className="pr-4 cursor-pointer opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 translate-all duration-300">
             <a href={link} target="_blank">
               <ShareIcon />
             </a>
