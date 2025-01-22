@@ -1,12 +1,14 @@
 import { Button } from "./components/Button";
-import { PlusIcon } from "./icons/PlusIcon";
+import { StashIcon } from "./icons/StashIcon";
 import { ShareIcon } from "./icons/ShareIcon";
+import { Card } from "./components/Card";
 
 function App() {
   return (
-    <div className="bg-red-100">
-      <Button text="Stash It" variant="primary" startIcon={<PlusIcon />} />
+    <div>
+      <Button text="Stash" variant="primary" startIcon={<StashIcon />} />
       <Button text="Share" variant="secondary" startIcon={<ShareIcon />} />
+      <Card />
     </div>
   );
 }
