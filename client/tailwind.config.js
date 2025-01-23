@@ -6,6 +6,10 @@ export default {
       colors: {
         "slate-200": "#F4F4F5",
       },
+
+      fontFamily: {
+        satisfy: ["Satisfy", "serif"],
+      },
     },
   },
   plugins: [],
