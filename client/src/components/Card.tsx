@@ -1,6 +1,6 @@
 import { DeleteIcon } from "../icons/DeleteIcon";
 import { ShareIcon } from "../icons/ShareIcon";
-import { XIcon } from "../icons/xIcon";
+import { XIcon } from "../icons/XIcon";
 import { YoutubeIcon } from "../icons/YoutubeIcon";
 // import { Tweet } from "react-tweet";
 
