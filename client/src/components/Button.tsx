@@ -18,7 +18,9 @@ export function Button({ variant, text, startIcon, onClick }: ButtonProps) {
   return (
     <button
       onClick={onClick}
-      className={`${variantClasses[variant] + " " + defaultStyles}`}>
+      className={`text-slate-950 font-medium ${
+        variantClasses[variant] + " " + defaultStyles
+      }`}>
       <div className="pr-2">{startIcon}</div>
       {text}
     </button>
