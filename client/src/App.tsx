@@ -4,41 +4,45 @@ import { ShareIcon } from "./icons/ShareIcon";
 import { Card } from "./components/Card";
 import { CreateContentModal } from "./components/CreateContentModal";
 import { useState } from "react";
+import { Sidebar } from "./components/Sidebar";
 
 function App() {
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
-    <div className="p-4">
-      <CreateContentModal
-        open={modalOpen}
-        onClose={() => {
-          setModalOpen(false);
-        }}
-      />
-      <div className="flex justify-end gap-4 mb-8">
-        <Button
-          onClick={() => {
-            setModalOpen(true);
+    <div>
+      <Sidebar />
+      <div className="p-4 ml-60 min-h-screen bg-gray-100 ">
+        <CreateContentModal
+          open={modalOpen}
+          onClose={() => {
+            setModalOpen(false);
           }}
-          text="Stash"
-          variant="primary"
-          startIcon={<StashIcon />}
         />
-        <Button text="Share" variant="secondary" startIcon={<ShareIcon />} />
-      </div>
-      <div className="flex m-4 gap-4 font-semibold">
-        <Card
-          title="Trummp"
-          link="https://x.com/sfrei_/status/1881759013928591406"
-          type="twitter"
-        />
+        <div className="flex justify-end gap-4 mb-8">
+          <Button
+            onClick={() => {
+              setModalOpen(true);
+            }}
+            text="Stash"
+            variant="primary"
+            startIcon={<StashIcon />}
+          />
+          <Button text="Share" variant="secondary" startIcon={<ShareIcon />} />
+        </div>
+        <div className="flex m-4 gap-4 font-semibold">
+          <Card
+            title="Trummp"
+            link="https://x.com/sfrei_/status/1881759013928591406"
+            type="twitter"
+          />
 
-        <Card
-          title="Youtube video"
-          link="https://www.youtube.com/watch?v=FFetMn8VXE4"
-          type="youtube"
-        />
+          <Card
+            title="Youtube video"
+            link="https://www.youtube.com/watch?v=FFetMn8VXE4"
+            type="youtube"
+          />
+        </div>
       </div>
     </div>
   );

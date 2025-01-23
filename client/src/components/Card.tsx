@@ -12,14 +12,14 @@ interface CardProps {
 
 export function Card({ title, link, type }: CardProps) {
   return (
-    <div className="p-4 bg-white-200 border border-gray-200 rounded-md max-w-72 max-h-96 group">
-      <div className="flex justify-between items-center border-b-2 pb-2 border-gray-100 ">
+    <div className="p-4 bg-white-200 border border-gray-200 shadow-md rounded-md max-w-72 max-h-96 group">
+      <div className="flex justify-between items-center border-b-2 pb-2 border-black-100 ">
         <div className="flex items-center text-sm">
           <div className="pr-2">
-            {type === "youtube" && <YoutubeIcon />}
-            {type === "twitter" && <XIcon />}
+            {type === "youtube" && <YoutubeIcon fill="#FF0000" size="size-5" />}
+            {type === "twitter" && <XIcon fill="#000" size="size-4" />}
           </div>
-          <div>{title}</div>
+          <div className="text-slate-950">{title}</div>
         </div>
 
         <div className="flex text-gray-500 items-center">
