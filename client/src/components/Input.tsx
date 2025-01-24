@@ -1,9 +1,9 @@
-interface ModalInputProps {
+interface InputProps {
   placeholder: string;
   onChange?: () => void;
 }
 
-export function ModalInput({ placeholder, onChange }: ModalInputProps) {
+export function Input({ placeholder, onChange }: InputProps) {
   return (
     <div>
       <input

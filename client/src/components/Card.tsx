@@ -2,7 +2,6 @@ import { DeleteIcon } from "../icons/DeleteIcon";
 import { ShareIcon } from "../icons/ShareIcon";
 import { XIcon } from "../icons/XIcon";
 import { YoutubeIcon } from "../icons/YoutubeIcon";
-// import { Tweet } from "react-tweet";
 
 interface CardProps {
   title: string;
@@ -51,10 +50,6 @@ export function Card({ title, link, type }: CardProps) {
           </blockquote>
         )}
       </div>
-      {/*  */}
-      {/* <div className="overflow-scroll max-h-60">
-        <Tweet id="1881741968507838861" />
-      </div> */}
     </div>
   );
 }
