@@ -196,10 +196,6 @@ app.post("/api/v1/stash", userMiddleware, async (req, res) => {
         return;
       }
       const hash = random(10);
-
-      console.log(random(10));
-      console.log(random(5));
-      console.log(hash);
       await LinkModel.create({
         userId: req.userId,
         hash: hash,
