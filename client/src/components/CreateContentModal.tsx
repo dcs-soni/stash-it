@@ -11,7 +11,7 @@ export function CreateContentModal({ open, onClose }: CreateContentModalProps) {
   return (
     <div>
       {open && (
-        <div className="w-screen h-screen bg-slate-200 fixed top-0 left-0 opacity-90 flex justify-center">
+        <div className="w-screen h-screen bg-slate-400 fixed top-0 left-0 opacity-90 flex justify-center">
           <div className="flex flex-col justify-center">
             <span className="bg-white opacity-100 p-4 rounded-md flex flex-col justify-center">
               <div onClick={onClose} className="flex justify-end">
