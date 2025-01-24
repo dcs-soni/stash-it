@@ -1,6 +1,6 @@
 import { CrossIcon } from "../icons/CrossIcon";
 import { Button } from "./Button";
-import { ModalInput } from "./Modalnput";
+import { Input } from "./Input";
 
 interface CreateContentModalProps {
   open: boolean;
@@ -18,8 +18,8 @@ export function CreateContentModal({ open, onClose }: CreateContentModalProps) {
                 <CrossIcon />
               </div>
               <div>
-                <ModalInput placeholder={"Title"} />
-                <ModalInput placeholder={"Link"} />
+                <Input placeholder={"Title"} />
+                <Input placeholder={"Link"} />
               </div>
               <Button variant="primary" text="Submit" />
             </span>
