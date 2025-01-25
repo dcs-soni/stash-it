@@ -5,10 +5,12 @@ import { Card } from "../components/Card";
 import { CreateContentModal } from "../components/CreateContentModal";
 import { useState } from "react";
 import { Sidebar } from "../components/Sidebar";
+import { useContent } from "../hooks/useContent";
 
 function Dashboard() {
   const [modalOpen, setModalOpen] = useState(false);
 
+  const contents = useContent();
   return (
     <div>
       <Sidebar />
@@ -31,7 +33,7 @@ function Dashboard() {
           <Button text="Share" variant="secondary" startIcon={<ShareIcon />} />
         </div>
         <div className="flex m-4 gap-4 font-semibold">
-          <Card
+          {/* <Card
             title="Trummp"
             link="https://x.com/sfrei_/status/1881759013928591406"
             type="twitter"
@@ -41,7 +43,14 @@ function Dashboard() {
             title="Youtube video"
             link="https://www.youtube.com/watch?v=FFetMn8VXE4"
             type="youtube"
-          />
+          /> */}
+
+          <div className="flex gap-4 flex-wrap">
+            {JSON.stringify(contents)}
+            {contents.map(({ type, title, link }) => (
+              <Card link={link} type={type} title={title} />
+            ))}
+          </div>
         </div>
       </div>
     </div>
