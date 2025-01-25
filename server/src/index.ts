@@ -136,7 +136,7 @@ app.post(
   userMiddleware,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { link, type } = req.body;
+      const { link, type, title } = req.body;
 
       if (!req.userId) {
         res.status(403).json({
@@ -147,6 +147,7 @@ app.post(
       await ContentModel.create({
         link,
         type,
+        title,
         userId: req.userId,
         tags: [],
       });
