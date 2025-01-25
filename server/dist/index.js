@@ -36,7 +36,6 @@ app.post("/api/v1/signup", (req, res) => __awaiter(void 0, void 0, void 0, funct
         password: zod_1.z.string().min(6).max(25),
     });
     const parseDataWithSuccess = signupSchema.safeParse(req.body);
-    console.log(parseDataWithSuccess);
     if (!parseDataWithSuccess.success) {
         res.status(400).json({
             message: "Incorrect format",
@@ -111,7 +110,7 @@ app.post("/api/v1/signin", (req, res) => __awaiter(void 0, void 0, void 0, funct
 }));
 app.post("/api/v1/content", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { link, type } = req.body;
+        const { link, type, title } = req.body;
         if (!req.userId) {
             res.status(403).json({
                 message: "User ID not found in request",
@@ -120,6 +119,7 @@ app.post("/api/v1/content", middleware_1.userMiddleware, (req, res) => __awaiter
         yield db_1.ContentModel.create({
             link,
             type,
+            title,
             userId: req.userId,
             tags: [],
         });
