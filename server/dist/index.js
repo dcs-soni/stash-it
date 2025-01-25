@@ -22,8 +22,10 @@ const zod_1 = require("zod");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const middleware_1 = require("./middleware");
 const utils_1 = require("./utils");
+const cors_1 = __importDefault(require("cors"));
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
+app.use((0, cors_1.default)());
 app.post("/api/v1/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const signupSchema = zod_1.z.object({
         username: zod_1.z
@@ -34,6 +36,7 @@ app.post("/api/v1/signup", (req, res) => __awaiter(void 0, void 0, void 0, funct
         password: zod_1.z.string().min(6).max(25),
     });
     const parseDataWithSuccess = signupSchema.safeParse(req.body);
+    console.log(parseDataWithSuccess);
     if (!parseDataWithSuccess.success) {
         res.status(400).json({
             message: "Incorrect format",
@@ -160,9 +163,6 @@ app.post("/api/v1/stash", middleware_1.userMiddleware, (req, res) => __awaiter(v
                 return;
             }
             const hash = (0, utils_1.random)(10);
-            console.log((0, utils_1.random)(10));
-            console.log((0, utils_1.random)(5));
-            console.log(hash);
             yield db_1.LinkModel.create({
                 userId: req.userId,
                 hash: hash,
