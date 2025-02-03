@@ -9,6 +9,7 @@ export default {
 
       fontFamily: {
         satisfy: ["Satisfy", "serif"],
+        anta: ["Anta", "serif"],
       },
     },
   },
