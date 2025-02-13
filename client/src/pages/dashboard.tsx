@@ -1,57 +1,35 @@
-import { Button } from "../components/Button";
-import { StashIcon } from "../icons/StashIcon";
-import { ShareIcon } from "../icons/ShareIcon";
 import { Card } from "../components/Card";
-import { CreateContentModal } from "../components/CreateContentModal";
-import { useState } from "react";
 import { Sidebar } from "../components/Sidebar";
 import { useContent } from "../hooks/useContent";
+import { Header } from "../components/Header";
 
 function Dashboard() {
-  const [modalOpen, setModalOpen] = useState(false);
-
   const contents = useContent();
+
   return (
-    <div>
+    <div className="flex">
       <Sidebar />
-      <div className="p-4 ml-60 min-h-screen bg-gray-100 ">
-        <CreateContentModal
-          open={modalOpen}
-          onClose={() => {
-            setModalOpen(false);
-          }}
-        />
-        <div className="flex justify-end gap-4 mb-8">
-          <Button
-            onClick={() => {
-              setModalOpen(true);
-            }}
-            text="Stash"
-            variant="primary"
-            startIcon={<StashIcon />}
-          />
-          <Button text="Share" variant="secondary" startIcon={<ShareIcon />} />
-        </div>
-        <div className="flex m-4 gap-4 font-semibold">
-          {/* <Card
-            title="Trummp"
-            link="https://x.com/sfrei_/status/1881759013928591406"
-            type="twitter"
-          />
+      <div className="flex-1 ml-60">
+        <Header />
 
-          <Card
-            title="Youtube video"
-            link="https://www.youtube.com/watch?v=FFetMn8VXE4"
-            type="youtube"
-          /> */}
-
-          <div className="flex gap-4 flex-wrap">
-            {JSON.stringify(contents)}
-            {contents.map(({ type, title, link }) => (
-              <Card link={link} type={type} title={title} />
+        {contents.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-gray-500 text-lg">
+              No content stashed yet. Click "Stash" to add your first item!
+            </p>
+          </div>
+        ) : (
+          <div className="pt-24 pl-5 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {contents.map((content: any, index: number) => (
+              <Card
+                key={index}
+                link={content.link}
+                type={content.type}
+                title={content.title}
+              />
             ))}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

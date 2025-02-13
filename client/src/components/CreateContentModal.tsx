@@ -20,6 +20,10 @@ export function CreateContentModal({ open, onClose }: CreateContentModalProps) {
   const linkRef = useRef<HTMLInputElement>();
   const [type, setType] = useState(ContentType.Youtube);
 
+  function refreshPage() {
+    window.location.reload();
+  }
+
   async function addContent() {
     const title = titleRef.current?.value;
     const link = linkRef.current?.value;
@@ -37,12 +41,13 @@ export function CreateContentModal({ open, onClose }: CreateContentModalProps) {
     );
 
     onClose();
+    refreshPage();
   }
 
   return (
     <div>
       {open && (
-        <div className="w-screen h-screen bg-slate-400 fixed top-0 left-0 opacity-90 flex justify-center">
+        <div className="w-screen h-screen bg-slate-400 fixed top-0 left-0 opacity-90 flex justify-center z-10">
           <div className="flex flex-col justify-center">
             <span className="bg-white opacity-100 p-4 rounded-md flex flex-col justify-center">
               <div onClick={onClose} className="flex justify-end">
