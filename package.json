@@ -1,0 +1,17 @@
+{
+  "name": "stash-it",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev:frontend": "cd client && npm run dev",
+    "dev:backend": "cd server && (tsc -b && node dist/index.js)",
+    "dev": "concurrently  \"npm run dev:frontend\" \"npm run dev:backend\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
