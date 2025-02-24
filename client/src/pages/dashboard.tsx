@@ -1,7 +1,7 @@
-import { Card } from "../components/Card";
-import { Sidebar } from "../components/Sidebar";
-import { useContent } from "../hooks/useContent";
-import { Header } from "../components/Header";
+import { Card } from "@/components/Card";
+import { Sidebar } from "@/components/Sidebar";
+import { useContent } from "@/hooks/useContent";
+import { Header } from "@/components/Header";
 
 function Dashboard() {
   const contents = useContent();

@@ -1,9 +1,9 @@
 import { Button } from "../components/Button";
-import { Input } from "../components/Input";
 import axios from "axios";
 import { useState, useRef } from "react";
-import { BACKEND_URL } from "../config";
+import { BACKEND_URL } from "@/config";
 import { useNavigate } from "react-router-dom";
+import { InputWithIcon } from "@/components/InputWithIcon";
 
 export function Signin() {
   const [loading, setLoading] = useState(false);
@@ -44,26 +44,57 @@ export function Signin() {
   }
 
   return (
-    <div className="h-screen w-screen bg-gradient-to-b from-blue-600 to-blue-400 flex justify-center items-center">
-      <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full">
-        <h2 className="text-2xl font-bold text-center mb-6">Sign In</h2>
-        <Input reference={usernameRef} placeholder="Username" />
-        <Input reference={passwordRef} placeholder="Password" type="password" />
-        <div className="flex justify-center p-2 w-full">
+    <div className="min-h-screen w-full bg-gradient-to-br from-brand-50 via-white to-brand-300 flex justify-center items-center p-4 ">
+      <div className="w-full max-w-md animate-fadeIn">
+        <div className="backdrop-blur-sm bg-white/70 rounded-2xl shadow-lg p-8 border-l-4 border-brand-600">
+          <div className="space-y-2 mb-8">
+            <h1 className="text-3xl font-semibold text-center text-gray-800">
+              Sign In
+            </h1>
+            <p className="text-center text-gray-600">
+              Access your secure storage with Stash It
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <InputWithIcon
+              icon="user"
+              placeholder="Username"
+              ref={usernameRef}
+              autoComplete="username"
+            />
+
+            <InputWithIcon
+              icon="lock"
+              type="password"
+              placeholder="Password"
+              ref={passwordRef}
+              autoComplete="current-password"
+            />
+          </div>
+
           <Button
+            className="w-full mt-6 h-12 bg-brand-600 hover:bg-brand-700 text-white transition-colors"
             onClick={signin}
-            variant="primary"
-            text="Sign In"
-            fullWidth={true}
-            loading={loading}
-          />
+            disabled={loading}>
+            {loading ? (
+              <span className="flex items-center justify-center">
+                Signing in...
+              </span>
+            ) : (
+              "Sign In"
+            )}
+          </Button>
+
+          <p className="text-center text-gray-600 mt-6">
+            Don't have an account?{" "}
+            <a
+              href="/signup"
+              className="text-brand-600 hover:text-brand-700 transition-colors font-medium">
+              Sign Up
+            </a>
+          </p>
         </div>
-        <p className="text-center text-gray-600 mt-4">
-          Don't have an account?{" "}
-          <a href="/signup" className="text-blue-600 hover:underline">
-            Sign Up
-          </a>
-        </p>
       </div>
     </div>
   );

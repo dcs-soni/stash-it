@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { SaveIcon } from "../icons/SaveIcon";
-import { SecurityIcon } from "../icons/SecurityIcon";
-import { CloudIcon } from "../icons/CloudIcon";
+import { SaveIcon } from "@/icons/SaveIcon";
+import { SecurityIcon } from "@/icons/SecurityIcon";
+import { CloudIcon } from "@/icons/CloudIcon";
 
 export const Home = () => {
   const navigate = useNavigate();
@@ -9,8 +9,8 @@ export const Home = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Section with animated background */}
-      <div className="relative bg-blue-600 overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-40"></div>
+      <div className="relative bg-brand-600 overflow-hidden">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-80"></div>
         <div className="text-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 relative">
           <h1 className="animate-fade-in-up text-5xl md:text-7xl font-bold font-anta tracking-tight text-white mb-4">
             Stash It
@@ -109,19 +109,23 @@ export const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div className="p-6">
-              <div className="text-4xl font-bold text-blue-600 mb-2">100K+</div>
+              <div className="text-4xl font-bold text-brand-600 mb-2">
+                100K+
+              </div>
               <div className="text-gray-600">Active Users</div>
             </div>
             <div className="p-6">
-              <div className="text-4xl font-bold text-blue-600 mb-2">99.9%</div>
+              <div className="text-4xl font-bold text-brand-600 mb-2">
+                99.9%
+              </div>
               <div className="text-gray-600">Uptime</div>
             </div>
             <div className="p-6">
-              <div className="text-4xl font-bold text-blue-600 mb-2">50M+</div>
+              <div className="text-4xl font-bold text-brand-600 mb-2">50M+</div>
               <div className="text-gray-600">Files Stored</div>
             </div>
             <div className="p-6">
-              <div className="text-4xl font-bold text-blue-600 mb-2">5⭐</div>
+              <div className="text-4xl font-bold text-brand-600 mb-2">5⭐</div>
               <div className="text-gray-600">User Rating</div>
             </div>
           </div>
@@ -129,7 +133,7 @@ export const Home = () => {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-blue-600 text-white py-20">
+      <div className="bg-brand-600 text-white py-20">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold mb-8">Ready to get started?</h2>
           <p className="text-xl text-white/90 mb-8">
