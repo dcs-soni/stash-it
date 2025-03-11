@@ -5,6 +5,10 @@ import { useNavigate } from "react-router-dom";
 import { ShareIcon } from "@/icons/ShareIcon";
 import { DocumentIcon } from "@/icons/DocumentIcon";
 import { CreateContentModal } from "@/components/CreateContentModal";
+import { DeleteIcon } from "@/icons/DeleteIcon";
+
+import { SearchBar } from "../components/SearchBar";
+import { SearchResults } from "../components/SearchResults";
 
 interface Content {
   _id: string;
@@ -18,6 +22,33 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [shareHash, setShareHash] = useState<string | null>(null);
+  const [filteredContent, setFilteredContent] = useState<Content[]>([]);
+
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchAnswer, setSearchAnswer] = useState("");
+
+  const handleSearch = async (query: string) => {
+    setIsSearching(true);
+    try {
+      const response = await axios.post(
+        `${BACKEND_URL}/api/v1/search`,
+        { query },
+        {
+          headers: {
+            Authorization: localStorage.getItem("token"),
+          },
+        }
+      );
+      setSearchResults(response.data.results);
+      setSearchAnswer(response.data.answer);
+    } catch (error) {
+      console.error("Search error:", error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -38,6 +69,7 @@ export default function Dashboard() {
         },
       });
       setContents(response.data.content);
+      setFilteredContent(response.data.content);
     } catch (error) {
       console.error("Error fetching contents:", error);
     } finally {
@@ -67,12 +99,40 @@ export default function Dashboard() {
     navigate("/signin");
   }
 
+  async function handleDelete(contentId: string) {
+    try {
+      await axios.delete(`${BACKEND_URL}/api/v1/delete/${contentId}`, {
+        headers: {
+          Authorization: localStorage.getItem("token"),
+        },
+      });
+
+      setContents((prevContents) =>
+        prevContents.filter((content) => content._id !== contentId)
+      );
+    } catch (err) {
+      console.error("Error deleting content", err);
+    }
+
+    window.location.reload();
+  }
+
+  function filterCategory(type: string) {
+    setFilteredContent(() =>
+      contents.filter((content) => content.type === type)
+    );
+  }
+
+  function resetFilter() {
+    setFilteredContent(contents);
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-brand-900 to-gray-900">
       {/* Navigation */}
       <nav className="backdrop-blur-md bg-white/10 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex justify-between items-center h-1">
             <h1 className="text-2xl font-anta bg-gradient-to-r from-white to-brand-200 bg-clip-text text-transparent">
               Stash It
             </h1>
@@ -93,6 +153,20 @@ export default function Dashboard() {
           </div>
         </div>
       </nav>
+
+      <div className="m-8">
+        <SearchBar onSearch={handleSearch} isSearching={isSearching} />
+      </div>
+
+      {searchAnswer && (
+        <div className="w-full max-w-3xl mx-auto mb-8">
+          <div className="p-6 rounded-xl bg-brand-500/20 border border-brand-400/30 backdrop-blur-sm">
+            <p className="text-white text-lg">{searchAnswer}</p>
+          </div>
+        </div>
+      )}
+
+      <SearchResults results={searchResults} />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -129,13 +203,19 @@ export default function Dashboard() {
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-semibold text-white">Your Content</h2>
             <div className="flex space-x-4">
-              <button className="text-white/70 hover:text-white transition-colors">
+              <button
+                onClick={resetFilter}
+                className="text-white/70 hover:text-white transition-colors">
                 All
               </button>
-              <button className="text-white/70 hover:text-white transition-colors">
+              <button
+                onClick={() => filterCategory("youtube")}
+                className="text-white/70 hover:text-white transition-colors">
                 Youtube
               </button>
-              <button className="text-white/70 hover:text-white transition-colors">
+              <button
+                onClick={() => filterCategory("twitter")}
+                className="text-white/70 hover:text-white transition-colors">
                 Twitter
               </button>
             </div>
@@ -159,13 +239,13 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {contents.map((content) => (
+              {filteredContent.map((content) => (
                 <div
                   key={content._id}
                   className="group backdrop-blur-md bg-white/5 rounded-2xl p-6 border border-white/10
-                           hover:bg-white/10 transition-all duration-300 hover:scale-105
-                           hover:shadow-xl hover:shadow-brand-500/10">
-                  <div className="flex items-start justify-between">
+                         hover:bg-white/10 transition-all duration-300 hover:scale-105
+                         hover:shadow-xl hover:shadow-brand-500/10">
+                  <div className="flex flex-col h-full justify-between">
                     <div>
                       <span className="inline-block px-3 py-1 text-xs rounded-full bg-brand-500/20 text-brand-200 mb-4">
                         {content.type}
@@ -173,17 +253,27 @@ export default function Dashboard() {
                       <h3 className="text-lg font-semibold text-white mb-2">
                         {content.title}
                       </h3>
+                    </div>
+
+                    <div className="flex items-center justify-between mt-4 w-full">
+                      {/* View Content Link */}
                       <a
                         href={content.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center space-x-2 text-brand-300 hover:text-brand-200 
-                                 transition-colors group-hover:translate-x-2 duration-300">
+                        className="flex items-center space-x-2 text-brand-300 hover:text-brand-200 
+                            transition-colors group-hover:translate-x-2 duration-300">
                         <span>View Content</span>
                         <span className="transform transition-transform duration-300 group-hover:translate-x-1">
                           →
                         </span>
                       </a>
+
+                      <button
+                        onClick={() => handleDelete(content._id)}
+                        className="text-red-500 hover:text-red-400 transition-colors">
+                        <DeleteIcon />
+                      </button>
                     </div>
                   </div>
                 </div>
