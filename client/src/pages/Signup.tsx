@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 export function Signup() {
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [errors, _] = useState<{ [key: string]: string }>({});
 
   const usernameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
