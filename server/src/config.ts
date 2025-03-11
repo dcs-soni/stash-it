@@ -7,7 +7,10 @@ export const config = {
   mongoUri: process.env.DATABASE_URL,
   chroma: {
     host: process.env.CHROMA_HOST || 'localhost',
-    port: process.env.CHROMA_PORT || 8000
+    port: parseInt(process.env.CHROMA_PORT || '8000'),
+    url: process.env.CHROMA_HOST ? 
+      `http://${process.env.CHROMA_HOST}:${process.env.CHROMA_PORT || '8000'}` :
+      'http://localhost:8000'
   },
   cors: {
     origin: process.env.CORS_ORIGIN || '*',

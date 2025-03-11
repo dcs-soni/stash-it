@@ -5,9 +5,7 @@ import { config } from "../config";
 
 // const hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
 const chromaClient = new ChromaClient({
-  path: config.isProduction 
-    ? `http://${config.chroma.host}:${config.chroma.port}`
-    : 'http://localhost:8000'
+  path: config.chroma.url
 });
 let collection: Collection;
 let embedder: any;
