@@ -19,7 +19,14 @@ export function Signup() {
     const password = passwordRef.current?.value;
 
     if (!username || !password) {
-      alert("Please fill in all fields");
+      toast.error("Error", {
+        description: (
+          <span className="text-red-500">Please fill in all fields.</span>
+        ),
+        style: {
+          color: "red",
+        },
+      });
       return;
     }
 
@@ -32,19 +39,39 @@ export function Signup() {
       });
 
       toast.success("Success!", {
-        description: "Your account has been created successfully.",
+        description: (
+          <span className="text-green-500">
+            Your account has been created successfully.
+          </span>
+        ),
         duration: 5000,
+        style: {
+          color: "green",
+        },
       });
       navigate("/signin");
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 411) {
         toast("Error", {
-          description:
-            "This username is already taken. Please choose another one.",
+          description: (
+            <span className="text-orange-400">
+              This username is already taken. Please choose another one
+            </span>
+          ),
+
+          duration: 5000,
+          style: {
+            color: "orange",
+          },
         });
       } else {
         toast.error("Error", {
-          description: "Something went wrong. Please try again.",
+          description: (
+            <span className="text-black">
+              Something went wrong. Please try again.
+            </span>
+          ),
+          duration: 5000,
         });
       }
     } finally {

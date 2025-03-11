@@ -1,9 +1,10 @@
 import { Button } from "../components/Button";
 import axios from "axios";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { BACKEND_URL } from "@/config";
 import { useNavigate } from "react-router-dom";
 import { InputWithIcon } from "@/components/InputWithIcon";
+import { toast } from "sonner";
 
 export function Signin() {
   const [loading, setLoading] = useState(false);
@@ -12,12 +13,27 @@ export function Signin() {
   const passwordRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, []);
+
   async function signin() {
     const username = usernameRef.current?.value;
     const password = passwordRef.current?.value;
 
     if (!username || !password) {
-      alert("Please fill in all fields");
+      toast.error("Error", {
+        description: (
+          <span className="text-red-400">"Please fill in all fields"</span>
+        ),
+        duration: 5000,
+        style: {
+          color: "red",
+        },
+      });
       return;
     }
 
@@ -31,12 +47,19 @@ export function Signin() {
 
       const jwt = response.data.token;
       localStorage.setItem("token", jwt);
-      navigate("/dashboard");
+      navigate("/dashboard", { replace: true });
+      window.history.pushState(null, "", "/dashboard");
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 403) {
-        alert("Invalid username or password");
+        toast("Error", {
+          description: "An error occurred. Please try again.",
+          duration: 5000,
+          style: {
+            color: "black",
+          },
+        });
       } else {
-        alert("An error occurred. Please try again.");
+        alert("");
       }
     } finally {
       setLoading(false);
