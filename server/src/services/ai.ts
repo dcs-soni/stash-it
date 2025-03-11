@@ -1,9 +1,14 @@
 // import { HfInference } from "@huggingface/inference";
 import { ChromaClient, Collection } from "chromadb";
 import { pipeline } from "@xenova/transformers";
+import { config } from "../config";
 
 // const hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
-const chromaClient = new ChromaClient();
+const chromaClient = new ChromaClient({
+  path: config.isProduction 
+    ? `http://${config.chroma.host}:${config.chroma.port}`
+    : 'http://localhost:8000'
+});
 let collection: Collection;
 let embedder: any;
 let textGenerator: any;
