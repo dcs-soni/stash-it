@@ -10,7 +10,7 @@ export function Header() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/signin");
+    navigate("/signin", { replace: true });
   };
 
   return (
@@ -31,11 +31,14 @@ export function Header() {
             onClick={() => {
               setModalOpen(true);
             }}
-            text="Stash"
             variant="primary"
-            startIcon={<StashIcon />}
-          />
-          <Button variant="secondary" text="Logout" onClick={handleLogout} />
+            startIcon={<StashIcon />}>
+            Stash
+          </Button>
+          <Button variant="secondary" onClick={handleLogout}>
+            {" "}
+            Logout
+          </Button>
         </div>
       </div>
     </div>

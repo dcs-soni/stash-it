@@ -1,7 +1,5 @@
 import { useState, useRef } from "react";
-import { CrossIcon } from "../icons/CrossIcon";
-import { Button } from "./Button";
-import { Input } from "./Input";
+import { CrossIcon } from "@/icons/CrossIcon";
 import { BACKEND_URL } from "../config";
 import axios from "axios";
 
@@ -16,73 +14,115 @@ enum ContentType {
 }
 
 export function CreateContentModal({ open, onClose }: CreateContentModalProps) {
-  const titleRef = useRef<HTMLInputElement>();
-  const linkRef = useRef<HTMLInputElement>();
+  const titleRef = useRef<HTMLInputElement>(null);
+  const linkRef = useRef<HTMLInputElement>(null);
   const [type, setType] = useState(ContentType.Youtube);
-
-  function refreshPage() {
-    window.location.reload();
-  }
 
   async function addContent() {
     const title = titleRef.current?.value;
-    const link = linkRef.current?.value;
+    let link = linkRef.current?.value;
 
-    await axios.post(
-      `${BACKEND_URL}/api/v1/content`,
-      {
-        link,
-        title,
-        type,
-      },
-      {
-        headers: { Authorization: localStorage.getItem("token") },
-      }
-    );
+    if(!link?.startsWith("https://") && !link?.startsWith("http://")) {
+      link = `https://${link}`
+    }
 
-    onClose();
-    refreshPage();
+    try {
+      await axios.post(
+        `${BACKEND_URL}/api/v1/content`,
+        {
+          link,
+          title,
+          type,
+        },
+        {
+          headers: { Authorization: localStorage.getItem("token") },
+        }
+      );
+      onClose();
+      window.location.reload();
+    } catch (error) {
+      console.error("Error adding content:", error);
+    }
   }
 
-  return (
-    <div>
-      {open && (
-        <div className="w-screen h-screen bg-slate-400 fixed top-0 left-0 opacity-90 flex justify-center z-10">
-          <div className="flex flex-col justify-center">
-            <span className="bg-white opacity-100 p-4 rounded-md flex flex-col justify-center">
-              <div onClick={onClose} className="flex justify-end">
-                <CrossIcon />
-              </div>
-              <div>
-                <Input reference={titleRef} placeholder={"Title"} />
-                <Input reference={linkRef} placeholder={"Link"} />
-              </div>
-              <div className="flex gap-1 p-4">
-                <Button
-                  text="Youtube"
-                  variant={
-                    type === ContentType.Youtube ? "primary" : "secondary"
-                  }
-                  onClick={() => {
-                    setType(ContentType.Youtube);
-                  }}
-                />
+  if (!open) return null;
 
-                <Button
-                  text="Twitter"
-                  variant={
-                    type === ContentType.Twitter ? "primary" : "secondary"
-                  }
-                  onClick={() => {
-                    setType(ContentType.Twitter);
-                  }}
-                />
-              </div>
-              <Button onClick={addContent} variant="primary" text="Submit" />
-            </span>
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm" onClick={onClose} />
+
+      {/* Modal */}
+      <div className="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 to-brand-900 p-6 text-left shadow-xl transition-all border border-white/20">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-semibold text-white">Add New Content</h3>
+          <button
+            onClick={onClose}
+            className="text-white/70 hover:text-white transition-colors">
+            <CrossIcon />
+          </button>
+        </div>
+
+
+        <div className="flex space-x-4 mb-6">
+          <button
+            onClick={() => setType(ContentType.Youtube)}
+            className={`flex-1 py-3 px-4 rounded-xl transition-all duration-300 ${
+              type === ContentType.Youtube
+                ? "bg-brand-500/30 border-brand-400/50 border text-white"
+                : "bg-white/5 border-white/10 border text-white/70 hover:bg-white/10"
+            }`}>
+            YouTube
+          </button>
+          <button
+            onClick={() => setType(ContentType.Twitter)}
+            className={`flex-1 py-3 px-4 rounded-xl transition-all duration-300 ${
+              type === ContentType.Twitter
+                ? "bg-brand-500/30 border-brand-400/50 border text-white"
+                : "bg-white/5 border-white/10 border text-white/70 hover:bg-white/10"
+            }`}>
+            Twitter
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <input
+              ref={titleRef}
+              placeholder="Title"
+              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white 
+                       placeholder-white/50 focus:border-brand-400/50 focus:outline-none focus:ring-0
+                       transition-all duration-300"
+            />
+          </div>
+          <div>
+            <input
+              ref={linkRef}
+              placeholder="Link"
+              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white 
+                       placeholder-white/50 focus:border-brand-400/50 focus:outline-none focus:ring-0
+                       transition-all duration-300"
+            />
           </div>
         </div>
-      )}
+
+        <div className="mt-6 flex justify-end space-x-4">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white/70 
+                     hover:bg-white/10 transition-all duration-300">
+            Cancel
+          </button>
+          <button
+            onClick={addContent}
+            className="px-6 py-2 rounded-xl bg-brand-500/20 text-white border border-brand-400/30
+                     hover:bg-brand-500/30 transition-all duration-300 hover:scale-105
+                     hover:shadow-lg hover:shadow-brand-500/20">
+            Add Content
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
