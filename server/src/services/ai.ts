@@ -82,6 +82,14 @@ export async function addContentToVectorDB(
     }
 
     console.log(`Adding content to vector DB: ${id}`);
+    
+    // Log metadata for debugging
+    console.log(`Metadata for ${id}:`, JSON.stringify(metadata));
+
+    // Ensure userId is included in metadata
+    if (!metadata.userId) {
+      console.warn("Warning: Adding content without userId in metadata");
+    }
 
     // Generate embedding for the content
     const embedding = await generateEmbedding(content);
@@ -91,7 +99,7 @@ export async function addContentToVectorDB(
       ids: [id],
       embeddings: [embedding],
       documents: [content],
-      metadatas: [metadata],
+      metadatas: [metadata]
     });
 
     console.log(`Successfully added content with ID: ${id}`);
@@ -124,48 +132,58 @@ export async function removeFromVectorDB(id: string): Promise<boolean> {
   }
 }
 
-export async function searchContent(query: string) {
+export async function searchContent(query: string, userId: string) {
   try {
     if (!collection) {
       // Initialize if not already done
       await initAI();
     }
-
-    console.log("Searching for query:", query);
-
-    // Get all content to make sure we have data
+    
+    console.log(`Searching for query: "${query}" for userId: ${userId}`);
+    
+    // Get all content to verify what's in the database
     const all = await collection.get();
-    console.log(`Collection has ${all.ids.length} documents`);
-
-    // Perform the search
+    console.log(`Collection has ${all.ids.length} documents total`);
+    
+    // Log sample metadata to check structure
+    if (all.metadatas && all.metadatas.length > 0) {
+      console.log("Sample metadata:", JSON.stringify(all.metadatas.slice(0, 3)));
+    }
+    
+    // First try a search without user filtering to check if results exist
+    const resultsNoFilter = await collection.query({
+      queryTexts: [query],
+      nResults: 10
+    });
+    
+    console.log(`Search without filtering found ${resultsNoFilter.documents?.[0]?.length || 0} results`);
+    
+    // Then try with userId filter
     const results = await collection.query({
       queryTexts: [query],
-      nResults: 5,
+      nResults: 10,
+      where: { userId: userId }
     });
-
-    console.log("Search results:", JSON.stringify(results, null, 2));
-
-    if (
-      !results.documents ||
-      !results.documents[0] ||
-      results.documents[0].length === 0
-    ) {
+    
+    console.log(`Search with userId filter found ${results.documents?.[0]?.length || 0} results for user ${userId}`);
+    
+    // Check if we have any results
+    if (!results.documents || !results.documents[0] || results.documents[0].length === 0) {
       return {
-        answer:
-          "I don't have any stashes that match your query yet. Try adding some content first!",
-        results: [],
+        answer: "I don't have any stashes that match your query yet. Try adding some content first!",
+        results: []
       };
     }
-
-    // Extract the documents for response generation
+    
+    // Continue with processing results
     const docs = results.documents[0];
-    const context = docs.join("\n");
-
+    const context = docs.join('\n');
+    
     // Generate a response based on the results
     let answer;
     try {
       const generated = await textGenerator(
-        `Based on your stashed content: ${context}\n\nQuestion: ${query}\nAnswer:`,
+        `Based on your stashed content: ${context}\n\n ${query}\nAnswer:`,
         {
           max_length: 150,
           temperature: 0.7,
@@ -183,21 +201,39 @@ export async function searchContent(query: string) {
         .map((d) => `"${d}"`)
         .join(", ")}`;
     }
-
-    // Return both the generated answer and the raw results
-    return {
-      answer,
-      results: results.metadatas[0].map((meta, i) => ({
-        content: docs[i],
-        similarity: results.distances ? results.distances[0][i] : null,
-        ...meta,
-      })),
-    };
+    
+    // Format results for the client
+    const formattedResults = results.documents[0].map((doc, i) => {
+      const metadata = results.metadatas?.[0]?.[i] || {};
+      return {
+        content: doc,
+        title: metadata.title || "Untitled",
+        link: metadata.link || "",
+        similarity: 1 - (results.distances?.[0]?.[i] || 0)
+      };
+    });
+    
+    // Sort by similarity and get only the top result
+    const sortedResults = formattedResults.sort((a, b) => b.similarity - a.similarity);
+    const bestMatch = sortedResults[0];
+    
+    // If we have a result with good similarity (above 0.5 or 50%)
+    if (bestMatch && bestMatch.similarity > 0.5) {
+      return {
+        answer: `I found this most relevant stash: "${bestMatch.title}" (${Math.round(bestMatch.similarity * 100)}% match)`,
+        results: [bestMatch]
+      };
+    } else {
+      return {
+        answer: "I couldn't find any highly relevant stashes matching your query.",
+        results: []
+      };
+    }
   } catch (error) {
     console.error("Search error:", error);
     return {
       answer: "Sorry, I encountered an error while searching your stashes.",
-      results: [],
+      results: []
     };
   }
 }
