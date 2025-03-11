@@ -10,6 +10,7 @@ import bcrypt from "bcrypt";
 import { userMiddleware } from "./middleware";
 import { random } from "./utils";
 import cors from "cors";
+import { initAI, searchContent, addContentToVectorDB, removeFromVectorDB } from "./services/ai";
 
 const app = express();
 app.use(express.json());
@@ -131,37 +132,35 @@ app.post(
   }
 );
 
-app.post(
-  "/api/v1/content",
-  userMiddleware,
-  async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { link, type, title } = req.body;
 
-      if (!req.userId) {
-        res.status(403).json({
-          message: "User ID not found in request",
-        });
-      }
 
-      await ContentModel.create({
-        link,
-        type,
-        title,
-        userId: req.userId,
-        tags: [],
-      });
+app.post("/api/v1/content", userMiddleware, async (req, res) => {
+  try {
+    const { link, type, title } = req.body;
+    
+    const content = await ContentModel.create({
+      link,
+      type,
+      title,
+      userId: req.userId,
+    });
 
-      res.json({
-        message: "Content added",
-      });
-    } catch (error) {
-      res.status(500).json({
-        message: "Error creating content",
-      });
-    }
+    // Create searchable content string that combines title and type
+    const searchableContent = `${title} - ${type}: ${link}`;
+    
+    // Add to vector database with content ID and metadata
+    await addContentToVectorDB(
+      content._id.toString(),
+      searchableContent,
+      { title, type, link }
+    );
+
+    res.json({ message: "Content added successfully" });
+  } catch (error) {
+    console.error("Error creating content:", error);
+    res.status(500).json({ message: "Error creating content" });
   }
-);
+});
 
 app.get("/api/v1/content", userMiddleware, async (req, res) => {
   const userId = req.userId;
@@ -174,14 +173,42 @@ app.get("/api/v1/content", userMiddleware, async (req, res) => {
   });
 });
 
-app.delete("/api/v1/delete", userMiddleware, async (req, res) => {
-  const contentId = req.body.contentId;
+app.delete(
+  "/api/v1/delete/:contentId",
+  userMiddleware,
+  async (req: Request, res: Response): Promise<void> => {
+    // In your delete endpoint:
+try {
+  const contentId = req.params.contentId;
 
-  await ContentModel.deleteMany({
-    contentId,
+  // Delete from MongoDB
+  const result = await ContentModel.deleteOne({
+    _id: contentId,
     userId: req.userId,
   });
-});
+
+  // If MongoDB deletion was successful, also delete from vector DB
+  if (result.deletedCount > 0) {
+    try {
+      await removeFromVectorDB(contentId);
+    } catch (vectorDbError) {
+      // Just log the error
+      console.error("Vector DB deletion failed, but MongoDB deletion succeeded:", vectorDbError);
+    }
+    
+    // Send success response (only once)
+    res.status(200).json({ message: "Content deleted successfully" });
+  } else {
+    // Send not found response (only once)
+    res.status(404).json({ message: "Content not found or not authorized to delete" });
+  }
+} catch (error) {
+  console.error("Error deleting content:", error);
+  // Check if headers have been sent before sending error response
+  if (!res.headersSent) {
+    res.status(500).json({ message: "Error deleting content" });
+  }
+}})
 
 app.post("/api/v1/stash", userMiddleware, async (req, res) => {
   try {
@@ -258,6 +285,47 @@ app.get("/api/v1/stash/:shareLink", async (req, res) => {
   });
 });
 
+app.post("/api/v1/search", userMiddleware, async (req, res) => {
+  try {
+    const { query } = req.body;
+    const results = await searchContent(query);
+    res.json(results);
+  } catch (error) {
+    console.error("Search error:", error);
+    res.status(500).json({ message: "Error performing search" });
+  }
+});
+
+// Modify your content creation endpoint to include AI indexing
+app.post("/api/v1/content", userMiddleware, async (req, res) => {
+  try {
+    const { link, type, title } = req.body;
+
+    const content = await ContentModel.create({
+      link,
+      type,
+      title,
+      userId: req.userId,
+      tags: [],
+    });
+
+    // Add to vector database
+    await addContentToVectorDB(
+      content._id.toString(),
+      `${title} ${type}`,
+      { title, type, link }
+    );
+
+    res.json({
+      message: "Content added",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error creating content",
+    });
+  }
+});
+
 async function main() {
   if (!process.env.DATABASE_URL) {
     throw new Error(
@@ -267,7 +335,10 @@ async function main() {
 
   await mongoose.connect(process.env.DATABASE_URL);
 
-  app.listen(3000);
+  app.listen(3000, async () => {
+    await initAI();
+    console.log("Server started on port 3000");
+  });
 }
 
 main();
