@@ -10,11 +10,23 @@ import bcrypt from "bcrypt";
 import { userMiddleware } from "./middleware";
 import { random } from "./utils";
 import cors from "cors";
-import { initAI, searchContent, addContentToVectorDB, removeFromVectorDB } from "./services/ai";
+import {
+  initAI,
+  searchContent,
+  addContentToVectorDB,
+  removeFromVectorDB,
+} from "./services/ai";
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+// Allow frontend to access backend
+app.use(
+  cors({
+    origin: ["https://stash-it-frontend.vercel.app"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true, // If you're using cookies or authentication tokens
+  })
+);
 
 app.post(
   "/api/v1/signup",
@@ -136,7 +148,7 @@ app.post("/api/v1/content", userMiddleware, async (req, res) => {
   try {
     const { link, type, title } = req.body;
     const userId = req.userId;
-    
+
     const content = await ContentModel.create({
       link,
       type,
@@ -146,13 +158,14 @@ app.post("/api/v1/content", userMiddleware, async (req, res) => {
 
     // Create searchable content string that combines title and type
     const searchableContent = `${title} - ${type}: ${link}`;
-    
+
     // Add to vector database with content ID and metadata
-    await addContentToVectorDB(
-      content._id.toString(),
-      searchableContent,
-      { title, type, link, userId }
-    );
+    await addContentToVectorDB(content._id.toString(), searchableContent, {
+      title,
+      type,
+      link,
+      userId,
+    });
 
     res.json({ message: "Content added successfully" });
   } catch (error) {
@@ -177,37 +190,44 @@ app.delete(
   userMiddleware,
   async (req: Request, res: Response): Promise<void> => {
     // In your delete endpoint:
-try {
-  const contentId = req.params.contentId;
-
-  // Delete from MongoDB
-  const result = await ContentModel.deleteOne({
-    _id: contentId,
-    userId: req.userId,
-  });
-
-  // If MongoDB deletion was successful, also delete from vector DB
-  if (result.deletedCount > 0) {
     try {
-      await removeFromVectorDB(contentId);
-    } catch (vectorDbError) {
-      // Just log the error
-      console.error("Vector DB deletion failed, but MongoDB deletion succeeded:", vectorDbError);
+      const contentId = req.params.contentId;
+
+      // Delete from MongoDB
+      const result = await ContentModel.deleteOne({
+        _id: contentId,
+        userId: req.userId,
+      });
+
+      // If MongoDB deletion was successful, also delete from vector DB
+      if (result.deletedCount > 0) {
+        try {
+          await removeFromVectorDB(contentId);
+        } catch (vectorDbError) {
+          // Just log the error
+          console.error(
+            "Vector DB deletion failed, but MongoDB deletion succeeded:",
+            vectorDbError
+          );
+        }
+
+        // Send success response (only once)
+        res.status(200).json({ message: "Content deleted successfully" });
+      } else {
+        // Send not found response (only once)
+        res
+          .status(404)
+          .json({ message: "Content not found or not authorized to delete" });
+      }
+    } catch (error) {
+      console.error("Error deleting content:", error);
+      // Check if headers have been sent before sending error response
+      if (!res.headersSent) {
+        res.status(500).json({ message: "Error deleting content" });
+      }
     }
-    
-    // Send success response (only once)
-    res.status(200).json({ message: "Content deleted successfully" });
-  } else {
-    // Send not found response (only once)
-    res.status(404).json({ message: "Content not found or not authorized to delete" });
   }
-} catch (error) {
-  console.error("Error deleting content:", error);
-  // Check if headers have been sent before sending error response
-  if (!res.headersSent) {
-    res.status(500).json({ message: "Error deleting content" });
-  }
-}})
+);
 
 app.post("/api/v1/stash", userMiddleware, async (req, res) => {
   try {
@@ -284,21 +304,25 @@ app.get("/api/v1/stash/:shareLink", async (req, res) => {
   });
 });
 
-app.post("/api/v1/search", userMiddleware, async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { query } = req.body;
-    const userId = req.userId;
-    if(!userId) {
-      res.status(400).json({ message: "User ID is required" });
-      return;
-    } 
-    const results = await searchContent(query, userId as string);
-    res.json(results);
-  } catch (error) {
-    console.error("Search error:", error);
-    res.status(500).json({ message: "Error performing search" });
+app.post(
+  "/api/v1/search",
+  userMiddleware,
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { query } = req.body;
+      const userId = req.userId;
+      if (!userId) {
+        res.status(400).json({ message: "User ID is required" });
+        return;
+      }
+      const results = await searchContent(query, userId as string);
+      res.json(results);
+    } catch (error) {
+      console.error("Search error:", error);
+      res.status(500).json({ message: "Error performing search" });
+    }
   }
-});
+);
 
 // Modify your content creation endpoint to include AI indexing (second one - duplicate route)
 app.post("/api/v1/content", userMiddleware, async (req, res) => {
@@ -315,11 +339,12 @@ app.post("/api/v1/content", userMiddleware, async (req, res) => {
     });
 
     // Add to vector database
-    await addContentToVectorDB(
-      content._id.toString(),
-      `${title} ${type}`,
-      { title, type, link, userId }
-    );
+    await addContentToVectorDB(content._id.toString(), `${title} ${type}`, {
+      title,
+      type,
+      link,
+      userId,
+    });
 
     res.json({
       message: "Content added",
