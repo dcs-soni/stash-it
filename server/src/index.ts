@@ -132,17 +132,16 @@ app.post(
   }
 );
 
-
-
 app.post("/api/v1/content", userMiddleware, async (req, res) => {
   try {
     const { link, type, title } = req.body;
+    const userId = req.userId;
     
     const content = await ContentModel.create({
       link,
       type,
       title,
-      userId: req.userId,
+      userId,
     });
 
     // Create searchable content string that combines title and type
@@ -152,7 +151,7 @@ app.post("/api/v1/content", userMiddleware, async (req, res) => {
     await addContentToVectorDB(
       content._id.toString(),
       searchableContent,
-      { title, type, link }
+      { title, type, link, userId }
     );
 
     res.json({ message: "Content added successfully" });
@@ -285,10 +284,15 @@ app.get("/api/v1/stash/:shareLink", async (req, res) => {
   });
 });
 
-app.post("/api/v1/search", userMiddleware, async (req, res) => {
+app.post("/api/v1/search", userMiddleware, async (req: Request, res: Response): Promise<void> => {
   try {
     const { query } = req.body;
-    const results = await searchContent(query);
+    const userId = req.userId;
+    if(!userId) {
+      res.status(400).json({ message: "User ID is required" });
+      return;
+    } 
+    const results = await searchContent(query, userId as string);
     res.json(results);
   } catch (error) {
     console.error("Search error:", error);
@@ -296,16 +300,17 @@ app.post("/api/v1/search", userMiddleware, async (req, res) => {
   }
 });
 
-// Modify your content creation endpoint to include AI indexing
+// Modify your content creation endpoint to include AI indexing (second one - duplicate route)
 app.post("/api/v1/content", userMiddleware, async (req, res) => {
   try {
     const { link, type, title } = req.body;
+    const userId = req.userId;
 
     const content = await ContentModel.create({
       link,
       type,
       title,
-      userId: req.userId,
+      userId,
       tags: [],
     });
 
@@ -313,7 +318,7 @@ app.post("/api/v1/content", userMiddleware, async (req, res) => {
     await addContentToVectorDB(
       content._id.toString(),
       `${title} ${type}`,
-      { title, type, link }
+      { title, type, link, userId }
     );
 
     res.json({
