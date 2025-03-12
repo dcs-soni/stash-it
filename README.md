@@ -1,5 +1,11 @@
 # Stash It - Your Personal Content Storage Solution 🚀
 
+
+
+https://github.com/user-attachments/assets/957f2aa0-611e-4a10-8f15-136ae499df09
+
+
+
 Welcome to **Stash It**, a full-stack application designed to help you securely store and manage your important content. Whether it's links, notes, or any other type of information, Stash It provides a seamless experience for organizing your digital life.
 
 ## Table of Contents 📚
