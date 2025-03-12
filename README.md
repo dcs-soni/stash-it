@@ -4,6 +4,10 @@
 
 https://github.com/user-attachments/assets/957f2aa0-611e-4a10-8f15-136ae499df09
 
+<video width="100%" controls autoplay loop muted>
+  <source src="[stashit.mp4](https://github.com/user-attachments/assets/957f2aa0-611e-4a10-8f15-136ae499df09)" type="video/mp4">
+</video>
+
 
 
 Welcome to **Stash It**, a full-stack application designed to help you securely store and manage your important content. Whether it's links, notes, or any other type of information, Stash It provides a seamless experience for organizing your digital life.
@@ -14,8 +18,6 @@ Welcome to **Stash It**, a full-stack application designed to help you securely 
 - [How It Works](#how-it-works)
 - [Getting Started](#getting-started)
 - [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Features 🌟
 - **User Authentication**: Sign up and log in securely with your username and password.
@@ -50,6 +52,11 @@ To get started with Stash It, follow these steps:
    ```
 
 2. **Install Dependencies**:
+
+   - For root folder:
+     ```bash
+     npm install
+     ```
    - For the server:
      ```bash
      cd server
@@ -61,8 +68,8 @@ To get started with Stash It, follow these steps:
      npm install
      ```
 
-3. **Set Up Environment Variables**:
-   Create a `.env` file in the `server` directory and add your MongoDB connection string and JWT secret:
+4. **Set Up Environment Variables**:
+   Create a `.env` file in the `server` directory and add your MongoDB connection string, JWT secret, Chroma host and port:
    ```plaintext
    DATABASE_URL=your_mongodb_connection_string
    JWT_SECRET=your_jwt_secret
@@ -70,20 +77,25 @@ To get started with Stash It, follow these steps:
    CHROMA_PORT=your_chroma_port
    ```
 
-4. **Run the Application**:
-   - Start the backend server:
+5. **Connect MongoDB database and start ChromaDB using Docker**:
+   - Ensure you have Docker installed. Then, run the following commands:
+   - Pull ChromaDB Docker Image (If not already pulled)
      ```bash
-     cd server
-     npm run dev
+     docker pull chromadb/chroma
      ```
-   - Start the frontend:
+   - Run ChromaDB Container
      ```bash
-     cd client
-     npm run dev
+     docker run -p 8000:8000 chromadb/chroma
      ```
-
-5. **Access the Application**:
-   Open your browser and navigate to `http://localhost:3000` to start using Stash It!
+   
+6. **Start the Application**:
+   - Since concurrently is installed, you can start both frontend and backend from the root folder:
+     ```bash
+     npm run start
+     ```
+  
+7. **Access the application**: 
+   Open your browser and navigate to `http://localhost:5173` to start using Stash It!
 
 ## Usage 📖
 - **Sign Up**: Create a new account to start storing your content.
@@ -91,10 +103,9 @@ To get started with Stash It, follow these steps:
 - **Search**: Utilize the search bar to quickly find your stashed content using vector search.
 - **Manage Content**: Edit or delete your content as needed.
 
+### Deployment Status 🚀
 
-## License 📄
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
+Deployment is currently in progress. ChromaDB in production is not working correctly with the backend. Please wait for it to be fully deployed and functional.
 ---
 
 Thank you for checking out Stash It! I hope you find it useful for managing your content. If you have any questions or feedback, feel free to reach out!
