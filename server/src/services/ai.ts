@@ -11,6 +11,20 @@ let collection: Collection;
 let embedder: any;
 let textGenerator: any;
 
+async function getEmbedder() {
+  if (!embedder) {
+    embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
+  }
+  return embedder;
+}
+
+async function getTextGenerator() {
+  if (!textGenerator) {
+    textGenerator = await pipeline("text-generation", "Xenova/gpt2");
+  }
+  return textGenerator;
+}
+
 // Create a custom embedding function that matches ChromaDB's IEmbeddingFunction interface
 class CustomEmbeddingFunction {
   async generate(texts: string[]): Promise<number[][]> {
@@ -50,19 +64,22 @@ export async function initAI() {
     console.log(`Collection '${collectionName}' already exists.`);
   }
 
-  // Load the embedding model
+  // // Load the embedding model
   embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
 
-  // Load the text generation model
+  // // Load the text generation model
   textGenerator = await pipeline("text-generation", "Xenova/gpt2");
 }
 
 export async function generateEmbedding(text: string): Promise<number[]> {
   try {
-    const output = await embedder(text, {
-      pooling: "mean",
-      normalize: true,
-    });
+    // const output = await embedder(text, {
+    //   pooling: "mean",
+    //   normalize: true,
+    // });
+
+    const embedder = await getEmbedder();
+    const output = await embedder(text, { pooling: "mean", normalize: true });
 
     // Extract the actual embedding array from the model output
     // The exact structure may vary depending on the model and transformer version
@@ -201,13 +218,18 @@ export async function searchContent(query: string, userId: string) {
     // Generate a response based on the results
     let answer;
     try {
-      const generated = await textGenerator(
+      //
+
+      const generator = await getTextGenerator();
+
+      const generated = await generator(
         `Based on your stashed content: ${context}\n\n ${query}\nAnswer:`,
         {
           max_length: 150,
           temperature: 0.7,
         }
       );
+
       answer = generated[0].generated_text;
 
       // Clean up the answer to remove the prompt
