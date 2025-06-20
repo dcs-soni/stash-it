@@ -18,15 +18,15 @@ import {
 } from "./services/ai";
 
 const app = express();
-app.use(express.json());
 // Allow frontend to access backend
 app.use(
   cors({
-    origin: ["https://stash-it-frontend.vercel.app"],
+    origin: ["https://stash-it-frontend.vercel.app", "http://localhost:5173"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true, // If you're using cookies or authentication tokens
   })
 );
+app.use(express.json());
 
 app.post(
   "/api/v1/signup",
