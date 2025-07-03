@@ -108,12 +108,12 @@ To get started with Stash It, follow these steps:
 - **Search**: Utilize the search bar to quickly find your stashed content using vector search.
 - **Manage Content**: Edit or delete your content as needed.
 
-### Deployment Status 🚀
+## Deployment Status 🚀
 
-✅ [Frontend](https://stash-it-frontend.vercel.app/): Live on Vercel..
-✅ [Backend](https://stashit.divyanshusoni.com/): Running on EC2 (Node.js + PM2 + Nginx + SSL).
+✅ [Frontend](https://stash-it-frontend.vercel.app/): Live on Vercel.<br>
+✅ [Backend](https://stashit.divyanshusoni.com/): Running on EC2 (Node.js + PM2 + Nginx + SSL).<br>
 ✅ [ChromaDB](http://51.21.202.232:8000/): Running in Docker container on EC2. 
-    To check ChromaDB health: [Go here](http://51.21.202.232:8000/api/v2/heartbeat)
+    To check ChromaDB API health/running status: [Go here](http://51.21.202.232:8000/api/v2/heartbeat).
 ---
 
 Thank you for checking out Stash It! If you find it useful, feel free to ⭐ the repo and reach out for suggestions or improvements!
