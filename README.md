@@ -13,11 +13,11 @@ https://github.com/user-attachments/assets/957f2aa0-611e-4a10-8f15-136ae499df09
 Welcome to **Stash It**, a full-stack application designed to help you securely store and manage your important content. Whether it's links, notes, or any other type of information, Stash It provides a seamless experience for organizing your digital life.
 
 ## Table of Contents 📚
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [How It Works](#how-it-works)
-- [Getting Started](#getting-started)
-- [Usage](#usage)
+- [Features](#Features)
+- [Tech Stack](#Tech-stack)
+- [How It Works](#How-It-Works)
+- [Getting Started](#Getting-Started)
+- [Usage](#Usage)
 
 ## Features 🌟
 - **User Authentication**: Sign up and log in securely with your username and password.
@@ -109,10 +109,11 @@ To get started with Stash It, follow these steps:
 - **Manage Content**: Edit or delete your content as needed.
 
 ## Deployment Status 🚀
-✅ [Frontend](https://stash-it-frontend.vercel.app/): Live on Vercel.<br>
-✅ [Backend](https://stashit.divyanshusoni.com/): Running on EC2 (Node.js + PM2 + Nginx + SSL).<br>
-✅ [ChromaDB](http://51.21.202.232:8000/): Running in Docker container on EC2. 
+- [Frontend](https://stash-it-frontend.vercel.app/): Live on Vercel.
+- [Backend](https://stashit.divyanshusoni.com/): Running on EC2 (Node.js + PM2 + Nginx + SSL).
+- [ChromaDB](http://51.21.202.232:8000/): Running in Docker container on EC2. 
     To check ChromaDB API health/running status: [Go here](http://51.21.202.232:8000/api/v2/heartbeat).
+
 ---
 
 Thank you for checking out Stash It! If you find it useful, feel free to ⭐ the repo and reach out for suggestions or improvements!
