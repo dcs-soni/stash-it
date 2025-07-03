@@ -31,7 +31,11 @@ Welcome to **Stash It**, a full-stack application designed to help you securely 
 - **Frontend**: React, Vite, TypeScript, Tailwind CSS
 - **Backend**: Node.js, Express, MongoDB, Mongoose
 - **AI Services**: ChromaDB, Hugging Face Transformers
-- **Deployment**: Vercel for frontend, Railway for backend
+- **Deployment**: 
+    Frontend: Vercel
+    Backend: AWS EC2 with PM2
+    ChromaDB: Docker (on EC2)
+    SSL: Nginx reverse proxy + Certbot
 
 ## How It Works 🔍
 Stash It leverages **ChromaDB** for efficient storage and retrieval of content. When you add content, it is transformed into embeddings using advanced AI models. These embeddings allow for quick and accurate vector searches, making it easy to find relevant information based on your queries.
@@ -76,6 +80,7 @@ To get started with Stash It, follow these steps:
    CHROMA_HOST=your_chroma_host
    CHROMA_PORT=your_chroma_port
    ```
+          
 
 5. **Connect MongoDB database and start ChromaDB using Docker**:
    - Ensure you have Docker installed. Then, run the following commands:
@@ -105,7 +110,10 @@ To get started with Stash It, follow these steps:
 
 ### Deployment Status 🚀
 
-Deployment is currently in progress. ChromaDB in production is not working correctly with the backend. Please wait for it to be fully deployed and functional.
+✅ [Frontend](https://stash-it-frontend.vercel.app/): Live on Vercel..
+✅ [Backend](https://stashit.divyanshusoni.com/): Running on EC2 (Node.js + PM2 + Nginx + SSL).
+✅ [ChromaDB](http://51.21.202.232:8000/): Running in Docker container on EC2. 
+    To check ChromaDB health: [Go here](http://51.21.202.232:8000/api/v2/heartbeat)
 ---
 
-Thank you for checking out Stash It! I hope you find it useful for managing your content. If you have any questions or feedback, feel free to reach out!
+Thank you for checking out Stash It! If you find it useful, feel free to ⭐ the repo and reach out for suggestions or improvements!
