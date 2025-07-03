@@ -365,7 +365,7 @@ async function main() {
 
   await mongoose.connect(process.env.DATABASE_URL);
 
-  app.listen(3000, async () => {
+  app.listen(3000, '0.0.0.0', async () => {
     await initAI();
     console.log("Server started on port 3000");
   });
