@@ -16,6 +16,7 @@ import {
   addContentToVectorDB,
   removeFromVectorDB,
 } from "./services/ai";
+import rateLimit from 'express-rate-limit';
 
 const app = express();
 // Allow frontend to access backend
@@ -26,7 +27,42 @@ app.use(
     credentials: true, // If you're using cookies or authentication tokens
   })
 );
+
 app.use(express.json());
+
+
+// Global rate limiter
+const globalLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 60 mins
+  max: 25, // 25 reqs/hr
+  message: "Too many requests from this IP, please try again after 1 hour.",
+});
+app.use(globalLimiter);
+
+
+
+// Stricter limiter for signup/signin
+const authLimiter = rateLimit({
+  windowMs: 30 * 60 * 1000, // 30 mins
+  max: 5,
+  message: "Too many signup/signin attempts. Please try again later.",
+});
+app.use("/api/v1/signup", authLimiter);
+app.use("/api/v1/signin", authLimiter);
+
+// Moderate limiter for /search route
+const searchLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 mins
+  max: 20,
+  message: {
+    status: 429,
+    error: "Too many search requests. Please try again in a while.",
+  },
+  standardHeaders: true, // RateLimit-* headers
+  legacyHeaders: false,  // Disable deprecated X-RateLimit-* headers
+});
+app.use("/api/v1/search", searchLimiter);
+
 
 app.post(
   "/api/v1/signup",
@@ -323,38 +359,6 @@ app.post(
     }
   }
 );
-
-// Modify your content creation endpoint to include AI indexing (second one - duplicate route)
-app.post("/api/v1/content", userMiddleware, async (req, res) => {
-  try {
-    const { link, type, title } = req.body;
-    const userId = req.userId;
-
-    const content = await ContentModel.create({
-      link,
-      type,
-      title,
-      userId,
-      tags: [],
-    });
-
-    // Add to vector database
-    await addContentToVectorDB(content._id.toString(), `${title} ${type}`, {
-      title,
-      type,
-      link,
-      userId,
-    });
-
-    res.json({
-      message: "Content added",
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Error creating content",
-    });
-  }
-});
 
 async function main() {
   if (!process.env.DATABASE_URL) {

@@ -28,6 +28,8 @@ export default function Dashboard() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchAnswer, setSearchAnswer] = useState("");
 
+  const [errorMessage, setErrorMessage] = useState("");
+
   const handleSearch = async (query: string) => {
     setIsSearching(true);
     try {
@@ -42,14 +44,32 @@ export default function Dashboard() {
       );
       setSearchResults(response.data.results);
       setSearchAnswer(response.data.answer);
-    } catch (error) {
-      console.error("Search error:", error);
+
+  
+    } catch (error: any) {
+      if (
+        
+        error.response.status === 429 
+    
+     
+      ) {
+        setErrorMessage(error.response.data.message); // ← Show message to user
+      } else {
+        setErrorMessage("Something went wrong during search.");
+      }
     } finally {
       setIsSearching(false);
     }
   };
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (errorMessage) {
+      const timer = setTimeout(() => setErrorMessage(""), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -157,6 +177,12 @@ export default function Dashboard() {
       <div className="m-8">
         <SearchBar onSearch={handleSearch} isSearching={isSearching} />
       </div>
+
+      {errorMessage && (
+  <div className="bg-red-100 text-red-800 p-3 rounded-md mb-4">
+    {errorMessage}
+  </div>
+)}
 
       {searchAnswer && (
         <div className="w-full max-w-3xl mx-auto mb-8">
