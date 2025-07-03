@@ -1,6 +1,6 @@
 // import { HfInference } from "@huggingface/inference";
 import { ChromaClient, Collection } from "chromadb";
-import { pipeline } from "@xenova/transformers";
+// import { pipeline } from "@xenova/transformers";
 import { config } from "../config";
 
 // const hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
@@ -11,8 +11,15 @@ let collection: Collection;
 let embedder: any;
 let textGenerator: any;
 
+// Helper to dynamically import Xenova's pipeline function
+async function getPipeline() {
+  const transformers = await import("@xenova/transformers");
+  return transformers.pipeline;
+}
+
 async function getEmbedder() {
   if (!embedder) {
+    const pipeline = await getPipeline();
     embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
   }
   return embedder;
@@ -20,6 +27,7 @@ async function getEmbedder() {
 
 async function getTextGenerator() {
   if (!textGenerator) {
+    const pipeline = await getPipeline();
     textGenerator = await pipeline("text-generation", "Xenova/gpt2");
   }
   return textGenerator;
@@ -65,10 +73,16 @@ export async function initAI() {
   }
 
   // // Load the embedding model
-  embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
+  // embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
+
+  embedder = await getEmbedder();
+
 
   // // Load the text generation model
-  textGenerator = await pipeline("text-generation", "Xenova/gpt2");
+  // textGenerator = await pipeline("text-generation", "Xenova/gpt2");
+
+  textGenerator = await getTextGenerator();
+  
 }
 
 export async function generateEmbedding(text: string): Promise<number[]> {
