@@ -109,7 +109,6 @@ To get started with Stash It, follow these steps:
 - **Manage Content**: Edit or delete your content as needed.
 
 ## Deployment Status 🚀
-
 ✅ [Frontend](https://stash-it-frontend.vercel.app/): Live on Vercel.<br>
 ✅ [Backend](https://stashit.divyanshusoni.com/): Running on EC2 (Node.js + PM2 + Nginx + SSL).<br>
 ✅ [ChromaDB](http://51.21.202.232:8000/): Running in Docker container on EC2. 
