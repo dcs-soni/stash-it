@@ -13,7 +13,8 @@ export const config = {
       : "http://localhost:8000",
   },
   cors: {
-    origin: process.env.CORS_ORIGIN || "*",
+    // origin: process.env.CORS_ORIGIN || "*",
+    origin: "https://stash-it-frontend.vercel.app",
     credentials: true,
   },
 };
