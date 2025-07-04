@@ -2,20 +2,20 @@ import { Request, Response } from "express";
 import express from "express";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
-import { ContentModel, LinkModel, UserModel } from "./db";
+import { ContentModel, LinkModel, UserModel } from "./db.js";
 import "dotenv/config";
-import { JWT_PASSWORD } from "./config";
-import { z } from "zod";
+import { JWT_PASSWORD } from "./config.js";
+import * as z  from "zod";
 import bcrypt from "bcrypt";
-import { userMiddleware } from "./middleware";
-import { random } from "./utils";
+import { userMiddleware } from "./middleware.js";
+import { random } from "./utils.js";
 import cors from "cors";
 import {
   initAI,
   searchContent,
   addContentToVectorDB,
   removeFromVectorDB,
-} from "./services/ai";
+} from "./services/ai.js";
 import rateLimit from 'express-rate-limit';
 
 const app = express();
