@@ -53,7 +53,8 @@ export default function Dashboard() {
     
      
       ) {
-        setErrorMessage(error.response.data.message); // ← Show message to user
+        alert(error.response.data.message);
+        setErrorMessage(error.response.data.message);
       } else {
         setErrorMessage("Something went wrong during search.");
       }
