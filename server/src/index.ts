@@ -190,12 +190,13 @@ app.post("/api/v1/content", userMiddleware, async (req, res) => {
       type,
       title,
       userId,
+      tags: [],
     });
 
     // Create searchable content string that combines title and type
     const searchableContent = `${title} - ${type}: ${link}`;
 
-    // Add to vector database with content ID and metadata
+//     // Add to vector database with content ID and metadata
     await addContentToVectorDB(content._id.toString(), searchableContent, {
       title,
       type,
@@ -209,6 +210,7 @@ app.post("/api/v1/content", userMiddleware, async (req, res) => {
     res.status(500).json({ message: "Error creating content" });
   }
 });
+
 
 app.get("/api/v1/content", userMiddleware, async (req, res) => {
   const userId = req.userId;
