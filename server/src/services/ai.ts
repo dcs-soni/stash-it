@@ -1,9 +1,5 @@
-// import { HfInference } from "@huggingface/inference";
 import { ChromaClient, Collection } from "chromadb";
-// import { pipeline } from "@xenova/transformers";
-import { config } from "../config";
 
-// const hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
 const chromaClient = new ChromaClient({
   path: process.env.CHROMA_API_URL,
 });
