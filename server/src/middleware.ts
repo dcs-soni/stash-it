@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { JWT_PASSWORD } from "./config";
+import { JWT_PASSWORD } from "./config.js";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
 declare global {

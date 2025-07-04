@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import { ContentModel, LinkModel, UserModel } from "./db.js";
 import "dotenv/config";
 import { JWT_PASSWORD } from "./config.js";
-import * as z  from "zod";
+import { z } from "zod";
 import bcrypt from "bcrypt";
 import { userMiddleware } from "./middleware.js";
 import { random } from "./utils.js";
