@@ -3,6 +3,8 @@ import { ChromaClient, Collection } from "chromadb";
 const chromaClient = new ChromaClient({
   path: process.env.CHROMA_API_URL,
 });
+
+
 let collection: Collection;
 let embedder: any;
 let textGenerator: any;
@@ -32,14 +34,17 @@ async function getTextGenerator() {
 // Create a custom embedding function that matches ChromaDB's IEmbeddingFunction interface
 class CustomEmbeddingFunction {
   async generate(texts: string[]): Promise<number[][]> {
-    const embeddings = [];
+    const embedder = await getEmbedder();
+    const embeddings: number[][] = [];
+
     for (const text of texts) {
-      const embedding = await generateEmbedding(text);
-      embeddings.push(embedding);
+      const output = await embedder(text, { pooling: "mean", normalize: true });
+      embeddings.push(Array.from(output.data) as number[]);
     }
+
     return embeddings;
   }
-}
+}   
 
 export async function initAI() {
   const collectionName = "stashit_content";
@@ -54,7 +59,7 @@ export async function initAI() {
   // Initialize ChromaDB collection
   if (!collectionExists) {
     // Create the collection if it does not exist
-    collection = await chromaClient.getOrCreateCollection({
+    collection = await chromaClient.createCollection({
       name: collectionName,
       embeddingFunction: new CustomEmbeddingFunction(),
       metadata: { "hnsw:space": "cosine" },
