@@ -48,17 +48,21 @@ class CustomEmbeddingFunction {
 
 export async function initAI() {
   const collectionName = "stashit_content";
-  const existingCollections = await chromaClient.listCollections();
-  const collectionExists = existingCollections.some(
+
+   // Create custom embedding function
+   const embeddingFunction = new CustomEmbeddingFunction();
+
+
+
+   try {
+
+    const existingCollections = await chromaClient.listCollections();
+    const collectionExists = existingCollections.some(
     (col: any) => col.name === collectionName
   );
 
-  // Create custom embedding function
-  const embeddingFunction = new CustomEmbeddingFunction();
-
   // Initialize ChromaDB collection
   if (!collectionExists) {
-    // Create the collection if it does not exist
     collection = await chromaClient.createCollection({
       name: collectionName,
       embeddingFunction: new CustomEmbeddingFunction(),
@@ -72,6 +76,21 @@ export async function initAI() {
     });
     console.log(`Collection '${collectionName}' already exists.`);
   }
+
+   } catch (err: any) {
+    // (due to race condition), fallback
+    if (err?.message?.includes("already exists")) {
+      console.warn(`⚠️ Collection '${collectionName}' already exists (from Chroma). Getting it instead...`);
+      collection = await chromaClient.getCollection({
+        name: collectionName,
+        embeddingFunction,
+      });
+    } else {
+      console.error("❌ Failed to initialize ChromaDB collection:", err);
+      throw err;
+    }
+  }
+  
 
   // // Load the embedding model
   // embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
