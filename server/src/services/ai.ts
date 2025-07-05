@@ -55,39 +55,43 @@ export async function initAI() {
 
 
    try {
-
-    const existingCollections = await chromaClient.listCollections();
-    const collectionExists = existingCollections.some(
-    (col: any) => col.name === collectionName
-  );
-
-  // Initialize ChromaDB collection
-  if (!collectionExists) {
-    collection = await chromaClient.createCollection({
-      name: collectionName,
-      embeddingFunction: new CustomEmbeddingFunction(),
-      metadata: { "hnsw:space": "cosine" },
-    });
-    console.log(`Collection '${collectionName}' created.`);
-  } else {
+    // Try to get the collection (assuming it may exist)
     collection = await chromaClient.getCollection({
       name: collectionName,
       embeddingFunction,
     });
-    console.log(`Collection '${collectionName}' already exists.`);
-  }
 
-   } catch (err: any) {
-    // (due to race condition), fallback
-    if (err?.message?.includes("already exists")) {
-      console.warn(`⚠️ Collection '${collectionName}' already exists (from Chroma). Getting it instead...`);
-      collection = await chromaClient.getCollection({
+    console.log(`✅ Collection '${collectionName}' fetched successfully.`);
+
+  } catch (getError: any) {
+    console.warn(`⚠️ Collection '${collectionName}' not found. Attempting to create it...`);
+
+    try {
+      // If not found, create it
+      collection = await chromaClient.createCollection({
         name: collectionName,
         embeddingFunction,
+        metadata: { "hnsw:space": "cosine" },
       });
-    } else {
-      console.error("❌ Failed to initialize ChromaDB collection:", err);
-      throw err;
+
+      console.log(`✅ Collection '${collectionName}' created.`);
+
+    } catch (createError: any) {
+      if (
+        createError?.message?.includes("already exists") ||
+        createError?.name === "ChromaUniqueError"
+      ) {
+        // If it still throws "already exists" due to race condition, fallback to get
+        console.warn(`⚠️ Collection '${collectionName}' already exists. Getting it instead...`);
+
+        collection = await chromaClient.getCollection({
+          name: collectionName,
+          embeddingFunction,
+        });
+      } else {
+        console.error("❌ Failed to initialize Chroma collection:", createError);
+        throw createError; // Let the caller handle this fatal error
+      }
     }
   }
   
