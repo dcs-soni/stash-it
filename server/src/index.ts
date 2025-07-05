@@ -33,6 +33,9 @@ app.use(
 
 app.use(express.json());
 
+// Handle preflight OPTIONS requests for all routes
+app.options('*', cors());
+
 
 // Global rate limiter
 const globalLimiter = rateLimit({
