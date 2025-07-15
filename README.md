@@ -114,6 +114,7 @@ To get started with Stash It, follow these steps:
 ✅ChromaDB: Running in Docker container on EC2. 
     To check ChromaDB API health/running status: <code>http://<EC2_instance:port>/api/v2/heartbeat</code>.
 
+The EC2 instance is stopped now as I am on a free tier 🤭
 ---
 
 Thank you for checking out Stash It! If you find it useful, feel free to ⭐ the repo and reach out for suggestions or improvements!
